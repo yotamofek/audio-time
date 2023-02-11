@@ -1,0 +1,11 @@
+[package]
+name = "audio-time"
+version = "0.0.1-alpha.1"
+edition = "2021"
+authors = ["Yotam Ofek <yotam.ofek@gmail.com>"]
+
+[dependencies]
+audio-core = "0.2.0-alpha"
+derive_more = "*"
+fn-formats = "*"
+thiserror = "*"
