@@ -3,6 +3,9 @@ name = "audio-time"
 version = "0.0.1-alpha.1"
 edition = "2021"
 authors = ["Yotam Ofek <yotam.ofek@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/yotamofek/audio-time"
+description = "Encode and convert audio time spans between representations in number of samples, number of bytes and time duration."
 
 [dependencies]
 audio-core = "0.2.0-alpha"
