@@ -9,6 +9,5 @@ description = "Encode and convert audio time spans between representations in nu
 
 [dependencies]
 audio-core = "0.2.0-alpha"
-derive_more = "*"
-fn-formats = "*"
-thiserror = "*"
+derive_more = "0.99"
+thiserror = "1"
