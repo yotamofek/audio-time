@@ -55,14 +55,3 @@ macro_rules! sample_rate {
         ::audio_time::SampleRate::new(::std::num::NonZeroU32::new($hz).unwrap())
     };
 }
-
-#[cfg(test)]
-mod tests {
-    use std::num::NonZeroI8;
-
-    #[test]
-    fn kaki() {
-        dbg!(sample_rate!(8000));
-        dbg!(NonZeroI8::new(1).unwrap());
-    }
-}
