@@ -12,7 +12,9 @@ mod sealed {
     use crate::System;
 
     /// An audio time span, measured by the number of samples contained in it.
-    #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+    #[derive(Copy, Eq, Hash, Display)]
+    #[derive_const(Clone, PartialEq, PartialOrd, Ord)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     #[repr(transparent)]
     pub struct Samples<const SYS: System>(usize);
 

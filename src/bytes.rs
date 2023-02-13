@@ -14,6 +14,7 @@ mod sealed {
     /// (without remainder) by the size of a single sample
     /// ([`SYS.sample_size()`](System::sample_size)).
     #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     #[repr(transparent)]
     pub struct Bytes<const SYS: System>(usize);
 

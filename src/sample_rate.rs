@@ -9,6 +9,7 @@ mod sealed {
     /// measured in hertz).
     #[derive(Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
     #[derive_const(Clone)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     #[repr(transparent)]
     pub struct SampleRate(NonZeroU32);
 
