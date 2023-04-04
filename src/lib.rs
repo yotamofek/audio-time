@@ -8,8 +8,10 @@
 //! #
 //! // the Audio CD standard defines the encoding system as follows:
 //! // 2 channels of LPCM audio, each signed 16-bit values sampled at 44100 Hz
-//! let samples = Samples::<AUDIO_CD>::from_duration(Duration::from_secs(1));
-//! assert_eq!(44_100, samples.get());
+//! let frames = Frames::<AUDIO_CD>::from_duration(Duration::from_secs(1));
+//! assert_eq!(44_100, frames.get());
+//! let samples = frames.into_samples();
+//! assert_eq!(88_200, samples.get());
 //! let bytes = samples.into_bytes();
 //! assert_eq!(176_400, bytes.get());
 //!
@@ -19,9 +21,11 @@
 //!
 //! // let's define our own `System`
 //! const SYSTEM: System = system!(8_000, Mono, i16);
-//! let samples = Samples::<SYSTEM>::from_duration(Duration::from_secs(1));
-//! assert_eq!(8_000, samples.get());
-//! let bytes = samples.into_bytes();
+//! let frames = Frames::<SYSTEM>::from_duration(Duration::from_secs(1));
+//! assert_eq!(8_000, frames.get());
+//! // in `Mono` systems, `Frames` and `Samples` are always equal
+//! assert_eq!(8_000, frames.into_samples().get());
+//! let bytes = frames.into_bytes();
 //! assert_eq!(16_000, bytes.get());
 //! ```
 
@@ -49,6 +53,7 @@ extern crate self as audio_time;
 mod bytes;
 mod channel_layout;
 mod convert;
+mod frames;
 mod sample;
 mod sample_rate;
 mod samples;
@@ -59,6 +64,7 @@ pub use ChannelLayout::{Mono, Stereo};
 pub use crate::{
     bytes::Bytes,
     channel_layout::ChannelLayout,
+    frames::Frames,
     sample::SampleType,
     sample_rate::SampleRate,
     samples::Samples,
@@ -84,40 +90,40 @@ mod tests {
     }
 
     #[test]
-    fn test_samples_to_duration() -> Result<(), OverflowError> {
+    fn test_frames_to_duration() -> Result<(), OverflowError> {
         assert_bidi!(
             Duration::ZERO,
-            Samples::<{ system!(44_100, Mono, i16) }>::new(0)
+            Frames::<{ system!(44_100, Mono, i16) }>::new(0)
         );
 
         assert_bidi!(
             Duration::from_secs(2),
-            Samples::<{ system!(44_100, Mono, i16) }>::new(88_200)
+            Frames::<{ system!(44_100, Mono, i16) }>::new(88_200)
         );
 
         assert_bidi!(
             Duration::from_millis(100),
-            Samples::<{ system!(8_000, Mono, i16) }>::new(800)
+            Frames::<{ system!(8_000, Mono, i16) }>::new(800)
         );
 
-        // channel layout and sample type should not matter in this conversion
+        // sample type should not matter in this conversion
         assert_bidi!(
             Duration::from_millis(100),
-            Samples::<{ system!(8_000, Stereo, f64) }>::new(800)
+            Frames::<{ system!(8_000, Mono, f64) }>::new(800)
         );
 
         // test overflow
         assert!(
-            Duration::try_from(Samples::<{ system!(8_000, Mono, i16) }>::new(usize::MAX)).is_err()
+            Duration::try_from(Frames::<{ system!(8_000, Mono, i16) }>::new(usize::MAX)).is_err()
         );
-        assert!(Samples::<{ system!(8_000, Mono, i16) }>::try_from(Duration::MAX).is_err());
+        assert!(Frames::<{ system!(8_000, Mono, i16) }>::try_from(Duration::MAX).is_err());
 
         {
             const SYS: System = system!(48_000, Mono, i16);
-            let millisecond = Samples::<SYS>::new(48);
+            let millisecond = Frames::<SYS>::new(48);
             assert_eq!(Duration::from_millis(1), millisecond.try_into()?);
 
-            let sub_millisecond = Samples::<SYS>::new(millisecond.get() - 1);
+            let sub_millisecond = Frames::<SYS>::new(millisecond.get() - 1);
             // this conversion is lossy for durations of under 1 milliseconds
             assert_eq!(Duration::from_millis(0), sub_millisecond.try_into()?);
             assert_ne!(
@@ -130,33 +136,33 @@ mod tests {
     }
 
     #[test]
-    fn test_samples_to_bytes() -> Result<(), OverflowError> {
-        assert_bidi!(bytes!(0), Samples::<{ system!(44_100, Mono, i16) }>::new(0));
+    fn test_frames_to_bytes() -> Result<(), OverflowError> {
+        assert_bidi!(bytes!(0), Frames::<{ system!(44_100, Mono, i16) }>::new(0));
 
         assert_bidi!(
             bytes!(2_000),
-            Samples::<{ system!(48_000, Mono, i16) }>::new(1_000)
+            Frames::<{ system!(48_000, Mono, i16) }>::new(1_000)
         );
 
         assert_bidi!(
             bytes!(4_000),
-            Samples::<{ system!(48_000, Stereo, i16) }>::new(1_000)
+            Frames::<{ system!(48_000, Stereo, i16) }>::new(1_000)
         );
 
         assert_bidi!(
             bytes!(8_000),
-            Samples::<{ system!(48_000, Stereo, i32) }>::new(1_000)
+            Frames::<{ system!(48_000, Stereo, i32) }>::new(1_000)
         );
 
         assert_bidi!(
             bytes!(16_000),
-            Samples::<{ system!(48_000, Stereo, i32) }>::new(2_000)
+            Frames::<{ system!(48_000, Stereo, i32) }>::new(2_000)
         );
 
         // sample rate should not matter in this conversion
         assert_bidi!(
             bytes!(8_000),
-            Samples::<{ system!(8_000, Stereo, i32) }>::new(1_000)
+            Frames::<{ system!(8_000, Stereo, i32) }>::new(1_000)
         );
 
         Ok(())

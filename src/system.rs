@@ -13,7 +13,7 @@ pub struct System {
 }
 
 impl System {
-    /// The number of bytes used to represent a single sample.
+    /// The number of bytes used to represent a single frame.
     ///
     /// Equal to the sample's byte depth
     /// ([`self.sample_type.byte_depth()`](crate::SampleType::byte_depth)) times
@@ -21,11 +21,11 @@ impl System {
     /// ([`self.channel_layout.channels()`](crate::ChannelLayout::channels)).
     #[inline]
     #[track_caller]
-    pub const fn sample_size(&self) -> NonZeroU8 {
+    pub const fn frame_size(&self) -> NonZeroU8 {
         self.channel_layout
             .channels()
             .checked_mul(self.sample_type.byte_depth())
-            .expect("Overflow trying to calculate system's sample size")
+            .expect("Overflow trying to calculate system's frame size")
     }
 }
 

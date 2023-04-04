@@ -1,10 +1,6 @@
-use std::{
-    fmt,
-    ops::{Div, Mul},
-    time::Duration,
-};
+use std::{fmt, ops::Mul, time::Duration};
 
-use crate::{Bytes, System};
+use crate::{Bytes, Frames, System};
 
 mod sealed {
     use derive_more::Display;
@@ -12,6 +8,12 @@ mod sealed {
     use crate::System;
 
     /// An audio time span, measured by the number of samples contained in it.
+    ///
+    ///
+    /// The `usize` contained in this struct is invariantly held to be divisible
+    /// (without remainder) by the number of channels in the system
+    /// ([`SYS.channel_layout.channels()`](crate::ChannelLayout::channels)).
+
     #[derive(Copy, Eq, Hash, Display)]
     #[derive_const(Clone, PartialEq, PartialOrd, Ord)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -19,9 +21,17 @@ mod sealed {
     pub struct Samples<const SYS: System>(usize);
 
     impl<const SYS: System> Samples<SYS> {
+        /// Create a `Samples` if the given value is divisible by
+        /// [`SYS.channel_layout.channels()`](crate::ChannelLayout::channels).
         #[inline]
-        pub const fn new(n: usize) -> Self {
-            Self(n)
+        pub const fn new(n: usize) -> Option<Self> {
+            let rem = n % usize::from(SYS.frame_size().get());
+
+            if rem == 0 {
+                Some(Self(n))
+            } else {
+                None
+            }
         }
 
         #[inline]
@@ -82,12 +92,24 @@ impl<const SYS: System> Samples<SYS> {
     pub const fn from_bytes(bytes: Bytes<SYS>) -> Self {
         bytes.into()
     }
-}
 
-impl<const SYS: System> const From<usize> for Samples<SYS> {
+    /// Equivalent to `Frames::from(samples)`.
     #[inline]
-    fn from(value: usize) -> Self {
-        Self::new(value)
+    #[track_caller]
+    pub const fn into_frames(self) -> Frames<SYS> {
+        self.into()
+    }
+
+    /// Equivalent to `Samples::try_from(frames).unwrap()`.
+    #[inline]
+    #[track_caller]
+    pub const fn from_frames(frames: Frames<SYS>) -> Self {
+        match frames.try_into() {
+            Ok(samples) => samples,
+            Err(_) => {
+                panic!("Overflowed trying to convert frames to samples")
+            }
+        }
     }
 }
 
@@ -104,7 +126,7 @@ impl<const SYS: System> const Mul for Samples<SYS> {
     #[inline]
     #[track_caller]
     fn mul(self, rhs: Self) -> Self::Output {
-        Self::new(self.get().mul(rhs.get()))
+        Self::new(self.get().mul(rhs.get())).unwrap()
     }
 }
 
@@ -117,29 +139,6 @@ where
     #[inline]
     #[track_caller]
     fn mul(self, rhs: T) -> Self::Output {
-        Self::new(self.get().mul(rhs))
-    }
-}
-
-impl<const SYS: System> const Div for Samples<SYS> {
-    type Output = Self;
-
-    #[inline]
-    #[track_caller]
-    fn div(self, rhs: Self) -> Self::Output {
-        Self::new(self.get().div(rhs.get()))
-    }
-}
-
-impl<const SYS: System, T> const Div<T> for Samples<SYS>
-where
-    usize: ~const Div<T, Output = usize>,
-{
-    type Output = Self;
-
-    #[inline]
-    #[track_caller]
-    fn div(self, rhs: T) -> Self::Output {
-        Self::new(self.get().div(rhs))
+        Self::new(self.get().mul(rhs)).unwrap()
     }
 }

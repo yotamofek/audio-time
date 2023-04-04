@@ -11,8 +11,8 @@ mod sealed {
     /// representation.
     ///
     /// The `usize` contained in this struct is invariantly held to be divisible
-    /// (without remainder) by the size of a single sample
-    /// ([`SYS.sample_size()`](System::sample_size)).
+    /// (without remainder) by the size of a single frame
+    /// ([`SYS.frame_size()`](System::frame_size)).
     #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     #[repr(transparent)]
@@ -20,10 +20,10 @@ mod sealed {
 
     impl<const SYS: System> Bytes<SYS> {
         /// Create a `Bytes` if the given value is divisible by
-        /// [`SYS.sample_size()`](System::sample_size).
+        /// [`SYS.frame_size()`](System::frame_size).
         #[inline]
         pub const fn new(n: usize) -> Option<Self> {
-            let rem = n % usize::from(SYS.sample_size().get());
+            let rem = n % usize::from(SYS.frame_size().get());
 
             if rem == 0 {
                 Some(Self(n))
