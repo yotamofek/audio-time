@@ -25,7 +25,7 @@ mod sealed {
         /// [`SYS.channel_layout.channels()`](crate::ChannelLayout::channels).
         #[inline]
         pub const fn new(n: usize) -> Option<Self> {
-            let rem = n % usize::from(SYS.frame_size().get());
+            let rem = n % usize::from(SYS.channel_layout.channels().get());
 
             if rem == 0 {
                 Some(Self(n))
