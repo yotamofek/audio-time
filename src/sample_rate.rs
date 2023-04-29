@@ -7,8 +7,7 @@ mod sealed {
 
     /// Audio sampling rate, the number of samples in a single second (i.e.
     /// measured in hertz).
-    #[derive(Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
-    #[derive_const(Clone)]
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     #[repr(transparent)]
     pub struct SampleRate(NonZeroU32);
@@ -38,13 +37,13 @@ impl fmt::Debug for SampleRate {
     }
 }
 
-impl const From<NonZeroU32> for SampleRate {
+impl From<NonZeroU32> for SampleRate {
     fn from(value: NonZeroU32) -> Self {
         Self::new(value)
     }
 }
 
-impl const From<SampleRate> for NonZeroU32 {
+impl From<SampleRate> for NonZeroU32 {
     fn from(value: SampleRate) -> Self {
         value.get()
     }

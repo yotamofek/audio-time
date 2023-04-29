@@ -1,6 +1,9 @@
 use std::{fmt, time::Duration};
 
-use crate::{Samples, System};
+use crate::{
+    convert::{bytes_to_samples, samples_to_bytes},
+    Samples, System,
+};
 
 mod sealed {
     use derive_more::Display;
@@ -23,7 +26,7 @@ mod sealed {
         /// [`SYS.frame_size()`](System::frame_size).
         #[inline]
         pub const fn new(n: usize) -> Option<Self> {
-            let rem = n % usize::from(SYS.frame_size().get());
+            let rem = n % SYS.frame_size().get() as usize;
 
             if rem == 0 {
                 Some(Self(n))
@@ -52,38 +55,28 @@ impl<const SYS: System> Bytes<SYS> {
     #[inline]
     #[track_caller]
     pub const fn into_duration(self) -> Duration {
-        match self.try_into() {
-            Ok(dur) => dur,
-            Err(_) => {
-                panic!("Overflowed trying to convert bytes to duration")
-            }
-        }
+        self.into_samples().into_duration()
     }
 
     /// Equivalent to `Bytes::try_from(duration).unwrap()`.
     #[inline]
     #[track_caller]
     pub const fn from_duration(dur: Duration) -> Self {
-        match dur.try_into() {
-            Ok(samples) => samples,
-            Err(_) => {
-                panic!("Overflowed trying to convert duration to bytes")
-            }
-        }
+        Self::from_samples(Samples::from_duration(dur))
     }
 
     /// Equivalent to `Samples::from(bytes)`.
     #[inline]
     #[track_caller]
     pub const fn into_samples(self) -> Samples<SYS> {
-        self.into()
+        bytes_to_samples(self)
     }
 
     /// Equivalent to `Bytes::try_from(samples).unwrap()`.
     #[inline]
     #[track_caller]
     pub const fn from_samples(samples: Samples<SYS>) -> Self {
-        match samples.try_into() {
+        match samples_to_bytes(samples) {
             Ok(bytes) => bytes,
             Err(_) => {
                 panic!("Overflowed trying to convert samples to bytes")
@@ -92,7 +85,7 @@ impl<const SYS: System> Bytes<SYS> {
     }
 }
 
-impl<const SYS: System> const From<Bytes<SYS>> for usize {
+impl<const SYS: System> From<Bytes<SYS>> for usize {
     #[inline]
     fn from(value: Bytes<SYS>) -> Self {
         value.get()

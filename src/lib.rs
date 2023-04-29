@@ -32,14 +32,9 @@
 #![allow(incomplete_features)]
 #![feature(
     adt_const_params,
-    const_cmp,
-    const_convert,
     const_mut_refs,
-    const_num_from_num,
-    const_ops,
     const_option_ext,
     const_option,
-    const_result_drop,
     const_trait_impl,
     const_try,
     const_type_id,

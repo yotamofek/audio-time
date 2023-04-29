@@ -34,11 +34,7 @@ impl SampleType {
     #[inline]
     pub const fn new<Sample: audio_core::Sample + 'static>() -> Self {
         Self {
-            byte_depth: size_of::<Sample>()
-                .try_into()
-                .ok()
-                .and_then(NonZeroU8::new)
-                .unwrap(),
+            byte_depth: NonZeroU8::new(size_of::<Sample>() as u8).unwrap(),
             _type: type_id::<Sample>(),
         }
     }

@@ -4,7 +4,13 @@ use std::{
     time::Duration,
 };
 
-use crate::{Bytes, Samples, System};
+use crate::{
+    convert::{
+        bytes_to_frames, duration_to_frames, frames_to_bytes, frames_to_duration,
+        frames_to_samples, samples_to_frames,
+    },
+    Bytes, Samples, System,
+};
 
 mod sealed {
     use derive_more::Display;
@@ -12,8 +18,7 @@ mod sealed {
     use crate::System;
 
     /// An audio time span, measured by the number of frames contained in it.
-    #[derive(Copy, Eq, Hash, Display)]
-    #[derive_const(Clone, PartialEq, PartialOrd, Ord)]
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     #[repr(transparent)]
     pub struct Frames<const SYS: System>(usize);
@@ -44,7 +49,7 @@ impl<const SYS: System> Frames<SYS> {
     #[inline]
     #[track_caller]
     pub const fn into_duration(self) -> Duration {
-        match self.try_into() {
+        match frames_to_duration(self) {
             Ok(dur) => dur,
             Err(_) => {
                 panic!("Overflowed trying to convert frames to duration")
@@ -56,7 +61,7 @@ impl<const SYS: System> Frames<SYS> {
     #[inline]
     #[track_caller]
     pub const fn from_duration(dur: Duration) -> Self {
-        match dur.try_into() {
+        match duration_to_frames(dur) {
             Ok(frames) => frames,
             Err(_) => {
                 panic!("Overflowed trying to convert duration to frames")
@@ -68,7 +73,7 @@ impl<const SYS: System> Frames<SYS> {
     #[inline]
     #[track_caller]
     pub const fn into_bytes(self) -> Bytes<SYS> {
-        match self.try_into() {
+        match frames_to_bytes(self) {
             Ok(bytes) => bytes,
             Err(_) => {
                 panic!("Overflowed trying to convert frames to duration")
@@ -80,14 +85,14 @@ impl<const SYS: System> Frames<SYS> {
     #[inline]
     #[track_caller]
     pub const fn from_bytes(bytes: Bytes<SYS>) -> Self {
-        bytes.into()
+        bytes_to_frames(bytes)
     }
 
     /// Equivalent to `Samples::try_from(frames).unwrap()`.
     #[inline]
     #[track_caller]
     pub const fn into_samples(self) -> Samples<SYS> {
-        match self.try_into() {
+        match frames_to_samples(self) {
             Ok(samples) => samples,
             Err(_) => {
                 panic!("Overflowed trying to convert frames to duration")
@@ -99,25 +104,25 @@ impl<const SYS: System> Frames<SYS> {
     #[inline]
     #[track_caller]
     pub const fn from_samples(samples: Samples<SYS>) -> Self {
-        samples.into()
+        samples_to_frames(samples)
     }
 }
 
-impl<const SYS: System> const From<usize> for Frames<SYS> {
+impl<const SYS: System> From<usize> for Frames<SYS> {
     #[inline]
     fn from(value: usize) -> Self {
         Self::new(value)
     }
 }
 
-impl<const SYS: System> const From<Frames<SYS>> for usize {
+impl<const SYS: System> From<Frames<SYS>> for usize {
     #[inline]
     fn from(value: Frames<SYS>) -> Self {
         value.get()
     }
 }
 
-impl<const SYS: System> const Mul for Frames<SYS> {
+impl<const SYS: System> Mul for Frames<SYS> {
     type Output = Self;
 
     #[inline]
@@ -127,9 +132,9 @@ impl<const SYS: System> const Mul for Frames<SYS> {
     }
 }
 
-impl<const SYS: System, T> const Mul<T> for Frames<SYS>
+impl<const SYS: System, T> Mul<T> for Frames<SYS>
 where
-    usize: ~const Mul<T, Output = usize>,
+    usize: Mul<T, Output = usize>,
 {
     type Output = Self;
 
@@ -140,7 +145,7 @@ where
     }
 }
 
-impl<const SYS: System> const Div for Frames<SYS> {
+impl<const SYS: System> Div for Frames<SYS> {
     type Output = Self;
 
     #[inline]
@@ -150,9 +155,9 @@ impl<const SYS: System> const Div for Frames<SYS> {
     }
 }
 
-impl<const SYS: System, T> const Div<T> for Frames<SYS>
+impl<const SYS: System, T> Div<T> for Frames<SYS>
 where
-    usize: ~const Div<T, Output = usize>,
+    usize: Div<T, Output = usize>,
 {
     type Output = Self;
 
