@@ -1,11 +1,11 @@
-use std::num::NonZeroU8;
+use std::{marker::ConstParamTy, num::NonZeroU8};
 
 use crate::{ChannelLayout, SampleRate, SampleType};
 
 /// A struct that encodes all parameters that are needed to interpret an audio
 /// time span as number of samples and/or the number of bytes needed to
 /// represent it.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, ConstParamTy)]
 pub struct System {
     pub sample_rate: SampleRate,
     pub channel_layout: ChannelLayout,

@@ -1,4 +1,6 @@
-use std::{intrinsics::type_id, mem::size_of, num::NonZeroU8};
+use std::{intrinsics::type_id, marker::ConstParamTy, mem::size_of};
+
+use nonzero_const_param::NonZeroU8;
 
 /// A type used to encode a single sample, created from a type that implements
 /// [audio_core::Sample].
@@ -16,7 +18,7 @@ use std::{intrinsics::type_id, mem::size_of, num::NonZeroU8};
 /// assert_eq!(SampleType::new::<i16>(), SampleType::new::<i16>());
 /// assert_ne!(SampleType::new::<i16>(), SampleType::new::<u16>());
 /// ```
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, ConstParamTy)]
 pub struct SampleType {
     byte_depth: NonZeroU8,
     _type: u64,
@@ -40,8 +42,8 @@ impl SampleType {
     }
 
     /// The [number of bytes](size_of) used to represent this sample type.
-    pub const fn byte_depth(&self) -> NonZeroU8 {
-        self.byte_depth
+    pub const fn byte_depth(&self) -> std::num::NonZeroU8 {
+        self.byte_depth.into_std()
     }
 }
 

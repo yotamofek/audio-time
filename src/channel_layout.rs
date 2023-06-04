@@ -1,6 +1,6 @@
-use std::num::NonZeroU8;
+use std::{marker::ConstParamTy, num::NonZeroU8};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, ConstParamTy)]
 pub enum ChannelLayout {
     Mono,
     Stereo,

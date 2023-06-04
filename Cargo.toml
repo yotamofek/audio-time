@@ -12,3 +12,4 @@ audio-core = "0.2.0-alpha"
 derive_more = "0.99"
 thiserror = "1"
 serde = { version = "1", features = ["derive"], optional = true }
+nonzero-const-param = { git = "https://github.com/yotamofek/nonzero-const-param", branch = "main", features = ["serde"] }
