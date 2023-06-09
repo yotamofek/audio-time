@@ -1,4 +1,4 @@
-use std::{intrinsics::type_id, marker::ConstParamTy, mem::size_of};
+use std::{fmt, intrinsics::type_id, marker::ConstParamTy, mem::size_of};
 
 use nonzero_const_param::NonZeroU8;
 
@@ -21,11 +21,11 @@ use nonzero_const_param::NonZeroU8;
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, ConstParamTy)]
 pub struct SampleType {
     byte_depth: NonZeroU8,
-    _type: u64,
+    _type: u128,
 }
 
-impl std::fmt::Debug for SampleType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for SampleType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("SampleType")
             .field("byte_depth", &self.byte_depth())
             .finish()
