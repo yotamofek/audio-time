@@ -85,7 +85,6 @@ mod frames {
     // Frames <-> Duration
     //
 
-    #[cfg(target_pointer_width = "64")] // TODO: impl for other archs
     pub(crate) const fn duration_to_frames<const SYS: System>(
         value: Duration,
     ) -> Result<Frames<SYS>, OverflowError> {
@@ -101,7 +100,6 @@ mod frames {
         }
     }
 
-    #[cfg(target_pointer_width = "64")] // TODO: impl for other archs
     pub(crate) const fn frames_to_duration<const SYS: System>(
         value: Frames<SYS>,
     ) -> Result<Duration, OverflowError> {
