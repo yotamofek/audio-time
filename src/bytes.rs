@@ -1,13 +1,11 @@
-use std::{fmt, time::Duration};
+use std::time::Duration;
 
 use crate::{
     convert::{bytes_to_samples, samples_to_bytes},
-    Samples, System,
+    impl_fmt, Samples, System,
 };
 
 mod sealed {
-    use derive_more::Display;
-
     use crate::System;
 
     /// An audio time span, measured in the number of bytes required for its
@@ -16,7 +14,7 @@ mod sealed {
     /// The `usize` contained in this struct is invariantly held to be divisible
     /// (without remainder) by the size of a single frame
     /// ([`SYS.frame_size()`](System::frame_size)).
-    #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+    #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     #[repr(transparent)]
     pub struct Bytes<const SYS: System>(usize);
@@ -44,11 +42,7 @@ mod sealed {
 
 pub use self::sealed::Bytes;
 
-impl<const SYS: System> fmt::Debug for Bytes<SYS> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fmt::Debug::fmt(&self.get(), f)
-    }
-}
+impl_fmt!(Bytes);
 
 impl<const SYS: System> Bytes<SYS> {
     /// Equivalent to `Duration::try_from(bytes).unwrap()`.

@@ -29,7 +29,7 @@
 //! assert_eq!(16_000, bytes.get());
 //! ```
 
-#![allow(incomplete_features)]
+#![allow(incomplete_features, internal_features)]
 #![feature(
     adt_const_params,
     const_mut_refs,
@@ -49,6 +49,7 @@ mod bytes;
 mod channel_layout;
 mod convert;
 mod frames;
+mod macros;
 mod sample;
 mod sample_rate;
 mod samples;

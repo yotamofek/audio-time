@@ -1,5 +1,4 @@
 use std::{
-    fmt,
     ops::{Div, Mul},
     time::Duration,
 };
@@ -9,16 +8,14 @@ use crate::{
         bytes_to_frames, duration_to_frames, frames_to_bytes, frames_to_duration,
         frames_to_samples, samples_to_frames,
     },
-    Bytes, Samples, System,
+    impl_fmt, Bytes, Samples, System,
 };
 
 mod sealed {
-    use derive_more::Display;
-
     use crate::System;
 
     /// An audio time span, measured by the number of frames contained in it.
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     #[repr(transparent)]
     pub struct Frames<const SYS: System>(usize);
@@ -38,11 +35,7 @@ mod sealed {
 
 pub use self::sealed::Frames;
 
-impl<const SYS: System> fmt::Debug for Frames<SYS> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fmt::Debug::fmt(&self.get(), f)
-    }
-}
+impl_fmt!(Frames);
 
 impl<const SYS: System> Frames<SYS> {
     /// Equivalent to `Duration::try_from(frames).unwrap()`.

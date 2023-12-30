@@ -3,12 +3,11 @@ use std::{fmt, num::NonZeroU32};
 mod sealed {
     use std::marker::ConstParamTy;
 
-    use derive_more::Display;
     use nonzero_const_param::NonZeroU32;
 
     /// Audio sampling rate, the number of samples in a single second (i.e.
     /// measured in hertz).
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Display, ConstParamTy)]
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, ConstParamTy)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     #[repr(transparent)]
     pub struct SampleRate(NonZeroU32);
@@ -27,6 +26,12 @@ mod sealed {
 }
 
 pub use self::sealed::SampleRate;
+
+impl fmt::Display for SampleRate {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.get(), f)
+    }
+}
 
 impl fmt::Debug for SampleRate {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

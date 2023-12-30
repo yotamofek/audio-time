@@ -1,13 +1,11 @@
-use std::{fmt, ops::Mul, time::Duration};
+use std::{ops::Mul, time::Duration};
 
 use crate::{
     convert::{bytes_to_samples, frames_to_samples, samples_to_bytes, samples_to_frames},
-    Bytes, Frames, System,
+    impl_fmt, Bytes, Frames, System,
 };
 
 mod sealed {
-    use derive_more::Display;
-
     use crate::System;
 
     /// An audio time span, measured by the number of samples contained in it.
@@ -17,7 +15,7 @@ mod sealed {
     /// (without remainder) by the number of channels in the system
     /// ([`SYS.channel_layout.channels()`](crate::ChannelLayout::channels)).
 
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Display)]
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     #[repr(transparent)]
     pub struct Samples<const SYS: System>(usize);
@@ -45,11 +43,7 @@ mod sealed {
 
 pub use self::sealed::Samples;
 
-impl<const SYS: System> fmt::Debug for Samples<SYS> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fmt::Debug::fmt(&self.get(), f)
-    }
-}
+impl_fmt!(Samples);
 
 impl<const SYS: System> Samples<SYS> {
     /// Equivalent to `Duration::try_from(samples).unwrap()`.

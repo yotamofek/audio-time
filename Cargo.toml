@@ -9,7 +9,6 @@ description = "Encode and convert audio time spans between representations in nu
 
 [dependencies]
 audio-core = "0.2.0-alpha"
-derive_more = "0.99"
 thiserror = "1"
 serde = { version = "1", features = ["derive"], optional = true }
 nonzero-const-param = { version = "0.0.1-alpha", features = ["serde"] }
