@@ -32,9 +32,6 @@
 #![allow(incomplete_features, internal_features)]
 #![feature(
     adt_const_params,
-    const_mut_refs,
-    const_option_ext,
-    const_option,
     const_trait_impl,
     const_try,
     const_type_id,
