@@ -37,7 +37,8 @@ impl SampleType {
     pub const fn new<Sample: audio_core::Sample + 'static>() -> Self {
         Self {
             byte_depth: NonZeroU8::new(size_of::<Sample>() as u8).unwrap(),
-            _type: type_id::<Sample>(),
+            // call to `type_id` needs to be inside an explicit `const` block, otherwise it ICEs
+            _type: const { type_id::<Sample>() },
         }
     }
 
