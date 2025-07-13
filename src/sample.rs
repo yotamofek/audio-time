@@ -1,4 +1,40 @@
-use std::{fmt, intrinsics::type_id, marker::ConstParamTy, mem::size_of};
+use std::{fmt, marker::ConstParamTy, mem::size_of};
+
+mod sealed {
+    use super::*;
+
+    #[derive(Clone, Copy, PartialEq, Eq, Hash, ConstParamTy)]
+    pub struct TypeId(u8);
+
+    /// # Safety
+    /// Implementors must make sure to use a unique type ID per implementation.
+    pub unsafe trait Sample: audio_core::Sample {
+        const TYPE_ID: TypeId;
+    }
+
+    macro_rules! impl_sample {
+        ($ty:ty, $id:literal) => {
+            unsafe impl Sample for $ty {
+                const TYPE_ID: TypeId = TypeId($id);
+            }
+        };
+    }
+
+    impl_sample!(u8, 0);
+    impl_sample!(u16, 1);
+    impl_sample!(u32, 2);
+    impl_sample!(u64, 3);
+    impl_sample!(u128, 4);
+    impl_sample!(i8, 5);
+    impl_sample!(i16, 6);
+    impl_sample!(i32, 7);
+    impl_sample!(i64, 8);
+    impl_sample!(i128, 9);
+    impl_sample!(usize, 10);
+    impl_sample!(isize, 11);
+    impl_sample!(f32, 12);
+    impl_sample!(f64, 13);
+}
 
 use nonzero_const_param::NonZeroU8;
 
@@ -18,10 +54,10 @@ use nonzero_const_param::NonZeroU8;
 /// assert_eq!(SampleType::new::<i16>(), SampleType::new::<i16>());
 /// assert_ne!(SampleType::new::<i16>(), SampleType::new::<u16>());
 /// ```
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, ConstParamTy)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ConstParamTy)]
 pub struct SampleType {
     byte_depth: NonZeroU8,
-    _type: u128,
+    _type: sealed::TypeId,
 }
 
 impl fmt::Debug for SampleType {
@@ -34,11 +70,10 @@ impl fmt::Debug for SampleType {
 
 impl SampleType {
     #[inline]
-    pub const fn new<Sample: audio_core::Sample + 'static>() -> Self {
+    pub const fn new<Sample: sealed::Sample + 'static>() -> Self {
         Self {
             byte_depth: NonZeroU8::new(size_of::<Sample>() as u8).unwrap(),
-            // call to `type_id` needs to be inside an explicit `const` block, otherwise it ICEs
-            _type: const { type_id::<Sample>() },
+            _type: Sample::TYPE_ID,
         }
     }
 

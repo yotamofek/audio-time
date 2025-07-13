@@ -29,13 +29,11 @@
 //! assert_eq!(16_000, bytes.get());
 //! ```
 
-#![allow(incomplete_features, internal_features)]
+#![allow(incomplete_features)]
 #![feature(
     adt_const_params,
     const_trait_impl,
     const_try,
-    const_type_id,
-    core_intrinsics,
     derive_const,
     try_blocks
 )]
