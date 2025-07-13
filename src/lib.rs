@@ -29,14 +29,7 @@
 //! assert_eq!(16_000, bytes.get());
 //! ```
 
-#![allow(incomplete_features)]
-#![feature(
-    adt_const_params,
-    const_trait_impl,
-    const_try,
-    derive_const,
-    try_blocks
-)]
+#![feature(adt_const_params)]
 
 extern crate self as audio_time;
 
